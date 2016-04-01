@@ -78,6 +78,7 @@ public class MyPieChartView extends View {
 	private int radius;
 	/**  当前点击的扇形 */
 	private int clickSector;
+	private  Point cursorP;
 	
 	private Point click_down_point;
 	private Point click_up_point;
@@ -112,7 +113,7 @@ public class MyPieChartView extends View {
 		paint.setColor(Color.RED);
 		circlePaint.setColor(getCircleTextColor());
 		circlePaint.setTextSize(30);
-	//	circlePaint.setTextAlign(Align.CENTER);
+		circlePaint.setTextAlign(Align.CENTER);
 		labelPaint.setColor(getLableTextColor());
 		notePaint.setColor(Color.DKGRAY);
 		paint.setAntiAlias(true); // 抗锯齿
@@ -122,10 +123,10 @@ public class MyPieChartView extends View {
 		notePaint.setTextAlign(Align.CENTER);
 		notePaint.setFakeBoldText(true);
 		
-		pdfMode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);// 两个图层，取上层非交集部分显示
-		
 		// init data
 		clickSector = -1;
+		 cursorP = new Point();
+		 pdfMode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);// 两个图层，取上层非交集部分显示
 	}
 	
 	@Override
@@ -144,6 +145,7 @@ public class MyPieChartView extends View {
 		canvas.drawColor(Color.TRANSPARENT);
 		float cursorAngle = 0f; // 游标角度
 		 PieModel p  = null;
+		
 		for (int i = 0; i < myPieAdapter.getCount(); i++) {
 			  p = myPieAdapter.getItem(i);
 			float sweepAngle =  ((p.sectorValue/totalValue)*360f);
@@ -163,6 +165,21 @@ public class MyPieChartView extends View {
 		
 		paint.setXfermode(null);
 		canvas.restore();
+	}
+	
+	/**
+	 * 计算扇形重点的坐标
+	 * @param centerPoint
+	 * @param startAngle
+	 * @param endAngle
+	 * @return
+	 */
+	private Point computeSectorMiddleCoord(Point centerPoint,float startAngle,float endAngle) {
+		Point point = new Point();
+		// 因为android画圆是从右边中间开始，度数在计算的时候用开始度数减去结束度数
+		int wDistance = (int) (Math.cos((startAngle-endAngle)/2)*radius);
+		
+		return point;
 	}
 	
 	@Override
