@@ -241,7 +241,7 @@ public class MyPieChartView extends View {
 		 * ¼ÆËã¾ØÕó
 		 */
 		int tempDistance = (radius-innerRadius)/4;
-		decorateRadius = innerRadius+tempDistance/2;
+		decorateRadius = innerRadius<=0?0:innerRadius+tempDistance/2;
 		
 		oval.left = centerCoord.x-radius;
 		oval.top = centerCoord.y-radius;
