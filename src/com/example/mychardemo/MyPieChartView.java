@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,6 +16,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -108,6 +110,8 @@ public class MyPieChartView extends View {
 	private int totalValue;
 	// 提供给外部当前选择饼图的接口
 	private OnPieSelectListener onPieSelectListener;
+	/** 当没有数据的时候显示得字 */
+	private String defaultText;
 	
 
 	public MyPieChartView(Context context, AttributeSet attrs) {
@@ -154,14 +158,17 @@ public class MyPieChartView extends View {
 		notePaint.setTextAlign(Align.CENTER);
 		circlePaint.setTextAlign(Align.CENTER);
 		
+		// 字体加粗
 		notePaint.setFakeBoldText(true);
-		circlePaint.setFakeBoldText(true);
+		//circlePaint.setFakeBoldText(true);
 		
 		// init data
 		clickSector = -1;
 		isRandColor = false;
 		isShowLabel = true;
 		 pdfMode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);// 两个图层，取上层非交集部分显示
+		 defaultText = "it's not have data or value is 0";
+		 innerRadius = -1;
 	}
 	
 	@Override
@@ -172,12 +179,10 @@ public class MyPieChartView extends View {
 		canvas.saveLayer(0, 0, getMeasuredWidth(), getMeasuredHeight(), paint, Canvas.ALL_SAVE_FLAG);
 		// 没有数据的时候提醒
 		if(myPieAdapter == null || totalValue <= 0) {
-			canvas.drawText("it's not have data or value is 0", centerCoord.x, centerCoord.y, notePaint);
+			canvas.drawText(defaultText, centerCoord.x, centerCoord.y, notePaint);
 			canvas.restore();
 			return;
 		}
-		
-	//	canvas.drawColor(Color.TRANSPARENT);
 		
 		for (MyPie p : pies) {
 			if(p.isTouch()) {
@@ -229,7 +234,9 @@ public class MyPieChartView extends View {
 			}
 			
 			radius = (widthSize > heightSize ? heightSize:widthSize)*7/15-maxPadding/2;
-			innerRadius = (4*radius)/7; // 内圆半径默认为外圆的4/7
+			if(innerRadius == -1) {
+				innerRadius = (4*radius)/7; // 内圆半径默认为外圆的4/7
+			}
 		} else {
 			innerRadius = 0;
 			radius = 0;
@@ -264,7 +271,8 @@ public class MyPieChartView extends View {
 		decorateOval.bottom = centerCoord.y+decorateRadius;	
 		if(isShowLabel) {
 			// tempDistance 在这里没有意义，只是为了能够离圆远点
-			cursorLabelPoint.x = centerCoord.x +radius+tempDistance;
+			cursorLabelPoint.x = (int) (centerCoord.x +radius+tempDistance-
+					getLabelTextSize()*max_label_length-labelSquareEdge*1.5);
 			cursorLabelPoint.y = centerCoord.y - radius;
 		}
 		
@@ -279,6 +287,26 @@ public class MyPieChartView extends View {
 	public void setAdapter(BasePieAdapter myPieAdapter){
 		this.myPieAdapter = myPieAdapter;
 		notifySetDataChanged();
+	}
+	
+	/**
+	 * 手动指定饼图选中状态
+	 * @param position
+	 */
+	public void setSelectPie(int position) {
+		if(position > pies.size()) {
+			throw new IllegalArgumentException("position is more than max size,the position is:"+position+","
+					+ "but the size is :"+pies.size());
+		}
+		clickSector = position;
+		for (int i = 0; i < pies.size(); i++) {
+			if(i == position) {
+				pies.get(i).setSelect(true);
+			} else {
+				pies.get(i).setSelect(false);
+			}
+		}
+		invalidate();
 	}
 	
 	@Override
@@ -343,6 +371,7 @@ public class MyPieChartView extends View {
 			pies.add(new MyPie(cursorAngle, sweepAngle, centerCoord,p,MyPie.LABEL_GRIVITY.DRAW_NONE_LABEL.navtieInt,i));
 			cursorAngle = cursorAngle+ sweepAngle;
 		}
+		
 		if(max_label_length > MAX_LABEL_SIZE) {
 			max_label_length = MAX_LABEL_SIZE;
 		}
@@ -362,6 +391,7 @@ public class MyPieChartView extends View {
 	 */
 	public void setInnerRaduis(int radius) {
 		this.innerRadius = radius;
+		invalidate();
 	}
 	
 	/**
@@ -389,7 +419,7 @@ public class MyPieChartView extends View {
 	 * 获得一个随机颜色，并且唯一
 	 * @return
 	 */
-	private int getRandomColor() {
+	public int getRandomColor() {
 		if(randColors == null) {
 			randColors = new ArrayList<Integer>();
 		}
@@ -416,7 +446,7 @@ public class MyPieChartView extends View {
 	}
 	
 	public float getLabelTextSize() {
-		return noteTextSize == 0f?30f:noteTextSize;
+		return noteTextSize == 0f?getRawSize(getContext(), TypedValue.COMPLEX_UNIT_SP, 10):noteTextSize;
 	}
 	
 	public void setCircleTextSize(float pixelSize) {
@@ -425,8 +455,17 @@ public class MyPieChartView extends View {
 		invalidate();
 	}
 	
+	/**
+	 * 修改没有数据时候的默认显示文字
+	 * @param text
+	 */
+	public void setDefaultText(String text) {
+		this.defaultText = text;
+		invalidate();
+	}
+	
 	public float getCircleTextSize() {
-		return circleLabelTextSize == 0f?40f:circleLabelTextSize;
+		return circleLabelTextSize == 0f?getRawSize(getContext(), TypedValue.COMPLEX_UNIT_SP, 12):circleLabelTextSize;
 	}
 	
 	public void setShowLabel(boolean flag) {
@@ -444,5 +483,18 @@ public class MyPieChartView extends View {
 	 */
 	public interface OnPieSelectListener{
 		public void selectChanged(int position);
+	}
+	
+	/**
+	 * 通过指定单位，返回一个像素值
+	 * xml单位适配
+	 * @param context 
+	 * @param unit 单位
+	 * @param value 数值
+	 * @return
+	 */
+	public  float getRawSize(Context context,int unit,float value) {
+		Resources res = context.getResources();
+		return TypedValue.applyDimension(unit, value, res.getDisplayMetrics());
 	}
 }

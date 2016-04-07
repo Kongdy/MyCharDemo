@@ -203,6 +203,13 @@ public class MyPie {
 		return isTouch;
 	}
 	
+	/**
+	 * 设置选中状态
+	 */
+	public void setSelect(boolean flag) {
+		isTouch = flag;
+	}
+	
 	public static enum LABEL_GRIVITY {
 		/**
 		 * 不画标注
