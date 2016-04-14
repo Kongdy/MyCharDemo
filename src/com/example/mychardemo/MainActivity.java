@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
 		mPie.setShowLabel(true);
 	//	mPie.setRandColor(true);
 		mPie.setAdapter(adapter);
+		mPie.setInnerRaduis(0);
 		mPie.setOnPieSelectListener(new OnPieSelectListener() {
 			
 			@Override

@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
 /**
  * 扇形对象
@@ -17,11 +18,13 @@ public class MyPie {
 	/**
 	 * 开始坐标
 	 */
-	private float startAngle;
+	public float startAngle;
 	/**
 	 * 结束坐标
 	 */
-	private float sweepAngle;
+	public float sweepAngle;
+	
+	public RectF oval;
 	/**
 	 * 圆重点坐标
 	 */
@@ -48,6 +51,8 @@ public class MyPie {
 	private int position;
 	/** 标注矩阵位置 */
 	private Rect rect;
+	/** 辅助动画的游标角度 */
+	public float cursorEndAngle;
 	/** 扇形区域 */
 	/* region适合path所构成的不规则图形，不适合本图形判断 */
 	//private Region region;
@@ -60,6 +65,7 @@ public class MyPie {
 		this.labelGrivity = labelGrivity;
 		this.position = position;
 		textP = new Point();
+		cursorEndAngle =  startAngle;
 	}
 
 	/**
@@ -78,16 +84,44 @@ public class MyPie {
 		}
 		this.radius = radius;
 		this.innerRadius = innerRadius;
+		this.oval = oval;
 		double numRate = sweepAngle/3.6;
 		BigDecimal bigRate = new BigDecimal(numRate);
 		bigRate = bigRate.setScale(1, BigDecimal.ROUND_HALF_UP);
 		rate = "%"+bigRate;
-		paint.setColor(p.sectorColor);
-		canvas.drawArc(oval, startAngle, sweepAngle, true, paint);
-		textP = computeSectorMiddleCoord(textP, startAngle+sweepAngle, sweepAngle);
-		canvas.drawText(p.sectorName,textP.x, textP.y, textPaint);
-		canvas.drawText(rate,textP.x, textP.y+textPaint.getTextSize(), textPaint);
+		myDraw(canvas, startAngle, sweepAngle, paint, textPaint, oval);
 	}
+	
+	/**
+	 * easyDraw
+	 * @param canvas
+	 * @param startAngle
+	 * @param sweepAngle
+	 * @param paint
+	 * @param textPaint
+	 * @param oval
+	 */
+	public void myDraw(Canvas canvas,float startAngle,float sweepAngle,Paint paint,Paint textPaint,RectF oval) {
+		if(TextUtils.isEmpty(rate)) {
+			double numRate = this.sweepAngle/3.6;
+			BigDecimal bigRate = new BigDecimal(numRate);
+			bigRate = bigRate.setScale(1, BigDecimal.ROUND_HALF_UP);
+			rate = "%"+bigRate;
+		}
+		if(sweepAngle > 0) {
+			paint.setColor(p.sectorColor);
+			canvas.drawArc(oval, startAngle, sweepAngle, true, paint);
+			textP = computeSectorMiddleCoord(textP, startAngle+sweepAngle, sweepAngle);
+			canvas.drawText(p.sectorName,textP.x, textP.y, textPaint);
+			canvas.drawText(rate,textP.x, textP.y+textPaint.getTextSize(), textPaint);
+		}
+	}
+	
+	public void setRadius(int radius,int innerRadius) {
+		this.radius = radius;
+		this.innerRadius = innerRadius;
+	}
+	
 	
 	/**
 	 * 初始化label参数
@@ -120,6 +154,7 @@ public class MyPie {
 	 */
 	public void drawLabel(Canvas canvas,Paint rectPaint,TextPaint textPaint,int labelSqaureEdge,Point labelPoint) {
 		initLabel(labelSqaureEdge, labelPoint);
+		rectPaint.setColor(p.sectorColor);
 		canvas.drawRect(rect, rectPaint);
 		canvas.drawText(getSelectorName(), this.labelPoint.x, this.labelPoint.y, textPaint);
 		// 预留
@@ -148,6 +183,8 @@ public class MyPie {
 		isTouch = false;
 		return false;
 	}
+	
+	
 	
 	/**
 	 * 计算坐标的相对于圆心的度数
