@@ -194,6 +194,7 @@ public class MyPieChartView extends View {
 		}
 
 		for (MyPie p : pies) {
+			p.setRadius(radius, innerRadius);
 			if (p.isTouch()) {
 				p.myDraw(canvas, p.startAngle, p.cursorEndAngle - p.startAngle,
 						paint, circlePaint, bigOval);
@@ -398,8 +399,10 @@ public class MyPieChartView extends View {
 				if(keyFactor != 2) {
 					for (MyPie mp : pies) {
 						mp.startAngle+=(tempDistance/5.0f)*keyFactor;
-						if(mp.startAngle >= 360) {
-							mp.startAngle = mp.startAngle-360;
+						if(mp.startAngle >= 360f) {
+							mp.startAngle = mp.startAngle-360f;
+						} else if(mp.startAngle <= 0f) {
+							mp.startAngle = 360f-Math.abs(mp.startAngle);
 						}
 						mp.cursorEndAngle = mp.startAngle+mp.sweepAngle;
 						

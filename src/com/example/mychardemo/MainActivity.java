@@ -40,8 +40,6 @@ public class MainActivity extends Activity {
 		
 		mPie = (MyPieChartView) findViewById(R.id.myPie);
 		mPie.setShowLabel(true);
-	//	mPie.setRandColor(true);
-		mPie.setAdapter(adapter);
 		mPie.setInnerRaduis(0);
 		mPie.setOnPieSelectListener(new OnPieSelectListener() {
 			
@@ -50,6 +48,8 @@ public class MainActivity extends Activity {
 				System.out.println("position:"+position);
 			}
 		});
+	//	mPie.setRandColor(true);
+		mPie.setAdapter(adapter);
 	}
 	
 }

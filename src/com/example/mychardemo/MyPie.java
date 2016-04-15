@@ -175,7 +175,14 @@ public class MyPie {
 		float bevelledEdge = (float) Math.sqrt(Math.pow(point.x-centerCoord.x, 2)+Math.pow(point.y-centerCoord.y, 2));
 		if(bevelledEdge <= radius && bevelledEdge > innerRadius) {
 			double angle = getPointAngle(point);
-			if(angle > startAngle && angle < (startAngle+sweepAngle) ) {
+			float overFlowAngle = 0f;
+			if(startAngle+sweepAngle > 360f) {
+				overFlowAngle = startAngle+sweepAngle - 360f;
+			}
+			if(angle > startAngle && angle < (startAngle+sweepAngle)) {
+				isTouch = true;
+				return true;
+			} else if(angle > 0f && angle < overFlowAngle) {
 				isTouch = true;
 				return true;
 			}
