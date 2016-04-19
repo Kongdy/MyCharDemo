@@ -284,15 +284,11 @@ public class MyPieChartView extends View {
 		decorateOval.right = centerCoord.x + decorateRadius;
 		decorateOval.bottom = centerCoord.y + decorateRadius;
 		if (isShowLabel) {
-			double a = getLabelTextSize()/2 * max_label_length - labelSquareEdge * 1.5;
+			double a = labelPaint.measureText("王") * max_label_length + labelSquareEdge * 1.5;
 			// tempDistance 在这里没有意义，只是为了能够离圆远点
 			cursorLabelPoint.x = (int) (centerCoord.x + radius + tempDistance
 					- a);
 			cursorLabelPoint.y = centerCoord.y - radius;
-		}
-		// 初始化半径
-		for (MyPie p : pies) {
-			p.setRadius(radius, innerRadius);
 		}
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
